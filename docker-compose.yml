@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lavoiture-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lavoiture
+      POSTGRES_PASSWORD: lavoiture
+      POSTGRES_DB: lavoiture
+    ports:
+      - "5432:5432"
+    volumes:
+      - lavoiture_pgdata:/var/lib/postgresql/data
+
+volumes:
+  lavoiture_pgdata:

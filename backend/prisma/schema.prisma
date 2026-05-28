@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  phone        String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  postalCode   String?
+  country      String   @default("DK")
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String      @default("")
+  priceCents  Int
+  currency    String      @default("dkk")
+  imageUrl    String      @default("")
+  category    String      @default("jewelry")
+  stock       Int         @default(0)
+  weightGrams Int         @default(50)
+  active      Boolean     @default(true)
+  featured    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id])
+  status            OrderStatus @default(PENDING)
+  subtotalCents     Int         @default(0)
+  shippingCostCents Int         @default(0)
+  totalCents        Int
+  currency          String      @default("dkk")
+  stripeSessionId   String?     @unique
+  stripeIntentId    String?
+  shippingName      String?
+  shippingPhone     String?
+  shippingAddress1  String?
+  shippingAddress2  String?
+  shippingCity      String?
+  shippingZip       String?
+  shippingCountry   String?
+  trackingNumber    String?
+  labelUrl          String?
+  carrier           String      @default("postnord")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  items             OrderItem[]
+}
+
+model OrderItem {
+  id              String  @id @default(cuid())
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product @relation(fields: [productId], references: [id])
+  productName     String
+  unitPriceCents  Int
+  quantity        Int
+  weightGrams     Int     @default(50)
+}
