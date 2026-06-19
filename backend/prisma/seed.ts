@@ -120,7 +120,7 @@ const products = [
 ];
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@lavoiture.test';
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@diyanara.test';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
   const passwordHash = await bcrypt.hash(adminPassword, 10);
@@ -130,7 +130,7 @@ async function main() {
     create: {
       email: adminEmail,
       passwordHash,
-      name: 'La Voiture Admin',
+      name: 'Diyanara Admin',
       role: Role.ADMIN,
       country: 'DK',
     },

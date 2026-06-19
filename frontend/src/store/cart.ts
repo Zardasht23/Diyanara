@@ -80,6 +80,6 @@ export const useCart = create<CartState>()(
         ),
       count: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'lv_cart' },
+    { name: 'diyanara_cart' },
   ),
 );

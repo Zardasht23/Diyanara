@@ -3,6 +3,7 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
   MinLength,
 } from 'class-validator';
@@ -10,14 +11,17 @@ import {
 export class CreateProductDto {
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   name!: string;
 
   @IsString()
   @MinLength(1)
+  @MaxLength(200)
   slug!: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(5000)
   description?: string;
 
   @IsInt()
@@ -26,20 +30,28 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(10)
   currency?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   imageUrl?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   category?: string;
 
   @IsOptional()
   @IsInt()
   @Min(0)
   stock?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  weightGrams?: number;
 
   @IsOptional()
   @IsBoolean()
@@ -51,14 +63,15 @@ export class CreateProductDto {
 }
 
 export class UpdateProductDto {
-  @IsOptional() @IsString() name?: string;
-  @IsOptional() @IsString() slug?: string;
-  @IsOptional() @IsString() description?: string;
+  @IsOptional() @IsString() @MaxLength(200) name?: string;
+  @IsOptional() @IsString() @MaxLength(200) slug?: string;
+  @IsOptional() @IsString() @MaxLength(5000) description?: string;
   @IsOptional() @IsInt() @Min(0) priceCents?: number;
-  @IsOptional() @IsString() currency?: string;
-  @IsOptional() @IsString() imageUrl?: string;
-  @IsOptional() @IsString() category?: string;
+  @IsOptional() @IsString() @MaxLength(10) currency?: string;
+  @IsOptional() @IsString() @MaxLength(2000) imageUrl?: string;
+  @IsOptional() @IsString() @MaxLength(100) category?: string;
   @IsOptional() @IsInt() @Min(0) stock?: number;
+  @IsOptional() @IsInt() @Min(1) weightGrams?: number;
   @IsOptional() @IsBoolean() active?: boolean;
   @IsOptional() @IsBoolean() featured?: boolean;
 }

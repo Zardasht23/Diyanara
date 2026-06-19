@@ -37,7 +37,7 @@ export function Header() {
       <div className="container flex h-16 md:h-20 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
           <span className="font-serif text-2xl md:text-3xl tracking-tight italic">
-            <span className="gold-gradient">La Voiture</span>
+            <span className="gold-gradient">Diyanara</span>
           </span>
         </Link>
 

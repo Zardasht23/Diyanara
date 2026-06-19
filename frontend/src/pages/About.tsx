@@ -16,7 +16,7 @@ export function About() {
             A small atelier with a <em className="italic gold-gradient">big</em> love for detail.
           </h1>
           <p className="mt-6 text-lg text-muted-foreground">
-            La Voiture was founded in 2021 in a little Parisian apartment,
+            Diyanara was founded in 2021 in a little Parisian apartment,
             with one bench, one torch, and the quiet conviction that
             jewelry should feel personal — not loud.
           </p>
@@ -45,7 +45,7 @@ export function About() {
           </p>
           <p className="mt-4 text-muted-foreground leading-relaxed">
             We name our collections after small, beloved things: a morning
-            light, a rainy avenue, a softly running car (yes — la voiture).
+            light, a rainy avenue, the quiet glow of dawn — diyanara.
           </p>
         </div>
       </section>

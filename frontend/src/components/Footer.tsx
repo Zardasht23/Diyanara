@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container py-14 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div className="md:col-span-2">
           <h3 className="font-serif italic text-2xl">
-            <span className="gold-gradient">La Voiture</span>
+            <span className="gold-gradient">Diyanara</span>
           </h3>
           <p className="mt-3 text-sm text-muted-foreground max-w-md">
             Modern, feminine fine jewelry — designed in Paris, crafted in small
@@ -24,7 +24,7 @@ export function Footer() {
               <Instagram className="h-4 w-4" />
             </a>
             <a
-              href="mailto:hello@lavoiture.test"
+              href="mailto:hello@diyanara.test"
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border hover:bg-accent transition-colors"
               aria-label="Email"
             >
@@ -79,7 +79,7 @@ export function Footer() {
 
       <div className="border-t border-border">
         <div className="container py-5 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} La Voiture. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Diyanara. All rights reserved.</p>
           <p>Made with care in Paris.</p>
         </div>
       </div>

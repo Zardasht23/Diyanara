@@ -1,16 +1,98 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: lavoiture-postgres
+    container_name: diyanara-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: lavoiture
-      POSTGRES_PASSWORD: lavoiture
-      POSTGRES_DB: lavoiture
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${POSTGRES_USER:-diyanara}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-diyanara}
     volumes:
-      - lavoiture_pgdata:/var/lib/postgresql/data
+      - ${DATA_PATH:-../data}/postgres:/var/lib/postgresql/data
+    networks:
+      - internal
+    command:
+      - postgres
+      - -c
+      - shared_buffers=128MB
+      - -c
+      - max_connections=100
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-diyanara} -d ${POSTGRES_DB:-diyanara}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${POSTGRES_MEMORY_LIMIT:-512M}
+        reservations:
+          memory: ${POSTGRES_MEMORY_RESERVATION:-256M}
 
-volumes:
-  lavoiture_pgdata:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: diyanara-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-diyanara}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-diyanara}?schema=public
+      DATA_DIR: /data
+      LABELS_DIR: /data/labels
+      UPLOADS_DIR: /data/uploads
+      NODE_ENV: production
+      RUN_SEED: ${RUN_SEED:-false}
+    volumes:
+      - ${DATA_PATH:-../data}:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${BACKEND_MEMORY_LIMIT:-512M}
+        reservations:
+          memory: ${BACKEND_MEMORY_RESERVATION:-128M}
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    container_name: diyanara-frontend
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:3010:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:80/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${FRONTEND_MEMORY_LIMIT:-128M}
+        reservations:
+          memory: ${FRONTEND_MEMORY_RESERVATION:-64M}
+
+networks:
+  internal:
+    driver: bridge

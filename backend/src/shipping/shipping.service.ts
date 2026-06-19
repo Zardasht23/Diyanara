@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { getLabelsDir, ensureDataDirs } from '../config/paths';
 
 export interface ShippingLabel {
   trackingNumber: string;
@@ -22,13 +23,13 @@ const FLAT_SHIPPING_CENTS = 6000;
 @Injectable()
 export class ShippingService {
   private readonly logger = new Logger(ShippingService.name);
-  private readonly labelsDir = path.resolve(process.cwd(), 'labels');
+  private readonly labelsDir = getLabelsDir();
   private readonly apiKey = process.env.POSTNORD_API_KEY || '';
   private readonly mockMode =
     !this.apiKey || this.apiKey.startsWith('postnord_xxx');
 
   constructor(private prisma: PrismaService) {
-    fs.mkdir(this.labelsDir, { recursive: true }).catch(() => undefined);
+    ensureDataDirs().catch(() => undefined);
     if (this.mockMode) {
       this.logger.warn(
         'POSTNORD_API_KEY not configured – labels will be generated in mock mode.',
@@ -168,7 +169,7 @@ export class ShippingService {
         email: order.user.email,
         smsNo: order.shippingPhone || undefined,
       },
-      reference: `LV-${order.id.slice(-8).toUpperCase()}`,
+      reference: `DY-${order.id.slice(-8).toUpperCase()}`,
       parcels: [{ weight: Math.max(50, weightGrams), valuePerParcel: true }],
     };
 
@@ -210,12 +211,12 @@ export class ShippingService {
 
   private senderInfo() {
     return {
-      name: process.env.SENDER_NAME || 'La Voiture',
+      name: process.env.SENDER_NAME || 'Diyanara',
       address1: process.env.SENDER_ADDRESS || 'Storegade 1',
       zip: process.env.SENDER_ZIP || '1000',
       city: process.env.SENDER_CITY || 'København',
       country: process.env.SENDER_COUNTRY || 'DK',
-      email: process.env.SENDER_EMAIL || 'shop@lavoiture.test',
+      email: process.env.SENDER_EMAIL || 'shop@diyanara.test',
       phone: process.env.SENDER_PHONE || '+4500000000',
     };
   }
@@ -248,7 +249,7 @@ export class ShippingService {
     const lines = [
       'PostNord (MOCK)',
       `Tracking: ${args.tracking}`,
-      `Order: LV-${args.orderId.slice(-8).toUpperCase()}`,
+      `Order: DY-${args.orderId.slice(-8).toUpperCase()}`,
       'TO',
       args.receiver.name,
       args.receiver.address1,

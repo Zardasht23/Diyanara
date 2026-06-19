@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
 export class ApiError extends Error {
   status: number;
@@ -9,7 +9,7 @@ export class ApiError extends Error {
 }
 
 function getToken(): string | null {
-  return localStorage.getItem('lv_token');
+  return localStorage.getItem('diyanara_token');
 }
 
 export async function api<T = unknown>(

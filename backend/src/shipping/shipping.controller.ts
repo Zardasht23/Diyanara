@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { ShippingService } from './shipping.service';
+import { getLabelsDir } from '../config/paths';
 
 @Controller()
 export class ShippingController {
@@ -47,7 +48,7 @@ export class ShippingController {
     if (req.user.role !== 'ADMIN' && order.userId !== req.user.id) {
       throw new ForbiddenException();
     }
-    const filePath = path.resolve(process.cwd(), 'labels', safe);
+    const filePath = path.join(getLabelsDir(), safe);
     try {
       const buf = await fs.readFile(filePath);
       res.setHeader('Content-Type', 'application/pdf');

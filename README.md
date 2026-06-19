@@ -1,135 +1,85 @@
-# La Voiture - Fine Jewelry Webshop
+# Diyanara — Fine Jewelry Webshop
 
-A modern, feminine e-commerce starter for the jewelry brand **La Voiture**,
-built end-to-end with the stack you asked for:
+A modern, feminine e-commerce webshop for the jewelry brand **Diyanara**, built with:
 
 - **Frontend:** React (Vite) + TypeScript + Tailwind CSS + shadcn-style UI
 - **Backend:** NestJS + Prisma + PostgreSQL
-- **Payments:** Stripe Checkout (with a built-in mock mode for local dev)
+- **Payments:** Stripe Checkout (with mock mode for local dev)
+- **Shipping:** PostNord integration with auto-generated labels
 - **Auth:** Email + password (JWT, bcrypt)
 
-It ships with:
+## Features
 
-- A polished **Home** landing page
-- A **Shop** page with category and sort filtering
-- **Product detail** pages with add-to-bag / buy-now
-- A persistent **cart** (prices in **DKK**)
-- A **Checkout** page that collects a Danish shipping address (prefilled from profile)
-- A **My Account** page where customers sign in by email, edit profile (name, phone, address), and see orders with PostNord tracking numbers
-- An **Admin Dashboard** where the owner can:
-  - See revenue, orders, customers and stock alerts
-  - Add / edit / delete products (with weight in grams for shipping)
-  - Update stock (e.g. mark a piece sold out)
-  - Change order status (PENDING -> PAID -> FULFILLED, etc.)
-  - Print / download PostNord shipping labels per order
-- **PostNord shipping integration** with auto-generated labels on paid orders (60 DKK / free over 250 DKK)
-- A simple **About Us** page
-- An 8-piece **seed catalog** so the shop is populated out of the box
+- Product catalog with category filtering and sorting
+- Product detail pages with add-to-bag / buy-now
+- Persistent shopping cart (prices in DKK)
+- Checkout with Danish shipping address
+- Customer accounts with order history and PostNord tracking
+- Admin dashboard (products, orders, stock, labels)
+- Stripe Checkout integration
+- PostNord shipping labels (60 DKK / free over 250 DKK)
 
----
+## Production deployment
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for full VPS deployment instructions.
+
+Quick deploy on the server:
+
+```bash
+cd /opt/projects/diyanara/app
+git pull
+docker compose up -d --build
+```
 
 ## Project structure
 
 ```
-enchantre/
-├── docker-compose.yml      # Postgres for local dev
+diyanara/
+├── docker-compose.yml          # Production stack
+├── docker-compose.dev.yml      # Local dev override (Postgres on localhost)
+├── .env.example                # Production environment template
+├── DEPLOYMENT.md           # Deployment guide
 ├── backend/                # NestJS API
-│   ├── prisma/             # schema.prisma + seed.ts
-│   └── src/                # auth, users, products, orders, stripe
-└── frontend/               # React + Vite app
-    └── src/                # pages, components, stores
+│   ├── Dockerfile
+│   ├── prisma/             # schema + migrations + seed
+│   └── src/
+└── frontend/               # React + Vite SPA
+    ├── Dockerfile
+    └── src/
 ```
 
----
+## Local development
 
-## 1. Prerequisites
+### Prerequisites
 
-- **Node.js 20+** and **npm**
-- **Docker** (recommended) or a local PostgreSQL 14+
+- Node.js 20+
+- Docker (for PostgreSQL)
 
----
-
-## 2. Start PostgreSQL
-
-From the repo root:
+### 1. Start PostgreSQL
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres
 ```
 
-This starts Postgres on `localhost:5432` with database `lavoiture`, user
-`lavoiture`, password `lavoiture`.
+Postgres runs on `127.0.0.1:5432` with database `diyanara`. The dev override file exposes the port on localhost only; production compose keeps Postgres on the internal network.
 
-> Prefer a non-Docker setup? Create that database manually and update
-> `DATABASE_URL` in `backend/.env` accordingly.
-
----
-
-## 3. Backend (NestJS)
+### 2. Backend
 
 ```bash
 cd backend
 cp env.example .env
 npm install
 npm run prisma:generate
-npm run prisma:migrate -- --name init
+npm run prisma:migrate
 npm run prisma:seed
 npm run start:dev
 ```
 
-The API will be available at `http://localhost:3001`.
+API: `http://localhost:3001`
 
-The seed creates:
+Default admin: `admin@diyanara.test` / `admin123` (change via `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` before seeding).
 
-- An **admin** user - `admin@lavoiture.test` / `admin123`
-- 8 sample products (one is intentionally out of stock to show the badge)
-
-> Change the admin credentials by editing `ADMIN_EMAIL` and `ADMIN_PASSWORD`
-> in `backend/.env` before running the seed.
-
-### Stripe configuration
-
-By default Stripe runs in **mock mode**: clicking "Checkout" creates a real
-order in the database and instantly marks it as paid, so you can test the
-full flow without keys.
-
-To use real Stripe Checkout:
-
-1. Get your test keys from <https://dashboard.stripe.com/test/apikeys>.
-2. Put the secret key in `backend/.env` as `STRIPE_SECRET_KEY=sk_test_...`.
-3. Forward webhooks locally:
-
-   ```bash
-   stripe listen --forward-to localhost:3001/stripe/webhook
-   ```
-
-   Then copy the resulting `whsec_...` into `STRIPE_WEBHOOK_SECRET`.
-
-### PostNord configuration
-
-By default PostNord runs in **mock mode**: a real (printable) PDF label is
-generated for every paid order with a mock tracking number, so you can test
-the full fulfilment flow without a PostNord contract.
-
-To wire up the real PostNord Booking API:
-
-1. Sign a PostNord Business contract and request a Booking API key
-   (<https://portal.postnord.com/se/en/resources/integrations/api/booking-api/>).
-2. Put the key in `backend/.env` as `POSTNORD_API_KEY=...`.
-3. Set the sender fields (`SENDER_NAME`, `SENDER_ADDRESS`, `SENDER_ZIP`,
-   `SENDER_CITY`, `SENDER_COUNTRY`, `SENDER_EMAIL`, `SENDER_PHONE`) to your
-   actual return address — they're printed on every label.
-4. Optionally override `POSTNORD_SERVICE_CODE` (defaults to `17` =
-   *MyPack Home DK*).
-
-Labels are saved to `backend/labels/<order-id>.pdf` and served via
-`GET /labels/:file` (auth-gated; customers can only see their own).
-
----
-
-## 4. Frontend (React + Vite)
-
-In a new terminal:
+### 3. Frontend
 
 ```bash
 cd frontend
@@ -138,105 +88,40 @@ npm install
 npm run dev
 ```
 
-The shop opens at `http://localhost:5173`.
+Shop: `http://localhost:5173`
 
-### Default routes
+## Routes
 
-| Route               | Description                                |
-| ------------------- | ------------------------------------------ |
-| `/`                 | Landing page                               |
-| `/shop`             | Catalog with filters and sorting           |
-| `/product/:slug`    | Product detail                             |
-| `/cart`             | Shopping bag + checkout                    |
-| `/about`            | About us                                   |
-| `/checkout`         | Shipping address + payment                 |
-| `/login`            | Customer sign-in                           |
-| `/register`         | Create an account                          |
-| `/account`          | My account, profile editor, orders         |
-| `/admin`            | Admin dashboard (admin role only)          |
+| Route | Description |
+| ----- | ----------- |
+| `/` | Landing page |
+| `/shop` | Catalog |
+| `/product/:slug` | Product detail |
+| `/cart` | Shopping bag |
+| `/checkout` | Shipping + payment |
+| `/account` | Customer account + orders |
+| `/admin` | Admin dashboard |
+| `/about` | About us |
 
----
-
-## 5. Try the full flow
-
-1. Open `http://localhost:5173` - browse the landing and shop.
-2. Add a piece to your bag.
-3. Click **Sign in to checkout**, then **Create one** at the bottom of the
-   login page - register a new customer account.
-4. Click **Checkout** - in mock mode you will be redirected straight back to
-   the **My Account** page with the order marked **PAID**. In real Stripe
-   mode you go to Stripe Checkout first.
-5. Sign out, then sign in as the admin (`admin@lavoiture.test` / `admin123`)
-   and visit `/admin`:
-   - Overview shows revenue and low-stock alerts.
-   - Products tab: edit details, change stock inline, or add a new piece.
-   - Orders tab: change order status to FULFILLED.
-
----
-
-## 6. API quick reference
-
-All endpoints are JSON. Authenticated endpoints expect
-`Authorization: Bearer <token>`.
-
-| Method | Path                  | Auth        | Description                          |
-| ------ | --------------------- | ----------- | ------------------------------------ |
-| POST   | `/auth/register`      | public      | Create account                       |
-| POST   | `/auth/login`         | public      | Sign in                              |
-| GET    | `/auth/me`            | user        | Current user                         |
-| GET    | `/users/me`           | user        | My full profile                      |
-| PATCH  | `/users/me`           | user        | Update my profile                    |
-| GET    | `/products`           | public      | Active products                      |
-| GET    | `/products/:idOrSlug` | public      | Product detail                       |
-| GET    | `/products/admin`     | admin       | All products incl. hidden            |
-| POST   | `/products`           | admin       | Create product                       |
-| PATCH  | `/products/:id`       | admin       | Update product                       |
-| DELETE | `/products/:id`       | admin       | Delete product                       |
-| POST   | `/checkout`           | user        | Start checkout with shipping address |
-| POST   | `/stripe/webhook`     | Stripe sig  | Stripe events                        |
-| GET    | `/orders/mine`        | user        | My orders                            |
-| GET    | `/orders`             | admin       | All orders                           |
-| PATCH  | `/orders/:id/status`  | admin       | Update order status                  |
-| POST   | `/orders/:id/label`   | admin       | (Re)generate PostNord label          |
-| GET    | `/labels/:file`       | user/admin  | Download label PDF                   |
-| GET    | `/users`              | admin       | All users                            |
-
----
-
-## 7. Production notes
-
-Things to tighten before going live:
-
-- Generate a real `JWT_SECRET` (long random string).
-- Move secrets out of `.env` into your hosting platform's secret store.
-- Add rate limiting / Helmet to NestJS.
-- Add server-side input length limits and XSS-safe rendering for descriptions.
-- Configure Stripe with live keys and the webhook URL on the dashboard.
-- Add a CDN-hosted image upload flow (S3, Cloudinary, etc.) instead of pasting
-  URLs in the admin form.
-- Set up SSL and a proper domain.
-
----
-
-## 8. Scripts cheat-sheet
+## Scripts
 
 ### Backend
 
 ```bash
-npm run start:dev      # watch mode
-npm run prisma:migrate # create / run migrations
-npm run prisma:seed    # seed admin + sample products
-npm run db:reset       # nuke DB and re-seed (destructive)
+npm run start:dev       # watch mode
+npm run prisma:migrate  # create / run migrations
+npm run prisma:seed     # seed admin + sample products
+npm run db:reset        # nuke DB and re-seed (destructive)
 ```
 
 ### Frontend
 
 ```bash
 npm run dev      # Vite dev server
-npm run build    # type-check + production build
-npm run preview  # serve the built bundle
+npm run build    # production build
+npm run preview  # serve built bundle
 ```
 
 ---
 
-Designed in code. Made with care. Enjoy.
+Designed in code. Made with care.

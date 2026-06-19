@@ -35,7 +35,7 @@ export function Home() {
               Jewels that whisper, <em className="italic gold-gradient">never shout.</em>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-              La Voiture creates modern, feminine fine jewelry — designed in
+              Diyanara creates modern, feminine fine jewelry — designed in
               Paris, crafted in small batches with responsibly sourced
               materials. Pieces meant to be worn every day, and remembered for
               a lifetime.
@@ -160,7 +160,7 @@ export function Home() {
               decades later.
             </p>
             <Button asChild className="mt-8" variant="outline" size="lg">
-              <Link to="/about">Discover La Voiture</Link>
+              <Link to="/about">Discover Diyanara</Link>
             </Button>
           </div>
         </div>

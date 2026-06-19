@@ -56,7 +56,7 @@ const STATUSES: OrderStatus[] = [
 
 async function downloadLabel(order: Order) {
   if (!order.labelUrl) return;
-  const token = localStorage.getItem('lv_token');
+  const token = localStorage.getItem('diyanara_token');
   const res = await fetch(`${apiUrl}${order.labelUrl}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
@@ -68,7 +68,7 @@ async function downloadLabel(order: Order) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `lavoiture-${order.id.slice(-8)}.pdf`;
+  a.download = `diyanara-${order.id.slice(-8)}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -77,7 +77,7 @@ async function downloadLabel(order: Order) {
 
 async function printLabel(order: Order) {
   if (!order.labelUrl) return;
-  const token = localStorage.getItem('lv_token');
+  const token = localStorage.getItem('diyanara_token');
   const res = await fetch(`${apiUrl}${order.labelUrl}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
