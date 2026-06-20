@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Prisma engines on Alpine require OpenSSL 3.x at build time
+RUN apk add --no-cache openssl
+
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -12,6 +15,9 @@ RUN npx prisma generate
 COPY . .
 RUN npm run build
 
+# Drop devDependencies; prisma stays (production dependency)
+RUN npm prune --omit=dev
+
 # ---- Production stage ----
 FROM node:20-alpine AS runner
 
@@ -19,18 +25,13 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN apk add --no-cache curl
+# openssl: required by Prisma query/migration engines on Alpine (OpenSSL 3.x)
+RUN apk add --no-cache curl openssl
 
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
-
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY prisma ./prisma
-COPY docker-entrypoint.sh ./
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/prisma ./prisma
+COPY --chown=node:node docker-entrypoint.sh ./
 
 RUN chmod +x docker-entrypoint.sh
 

@@ -4,7 +4,7 @@ set -e
 mkdir -p /data/labels /data/uploads
 
 echo "Running database migrations..."
-node_modules/.bin/prisma migrate deploy
+node node_modules/prisma/build/index.js migrate deploy
 
 if [ "${RUN_SEED:-false}" = "true" ]; then
   echo "Seeding database..."

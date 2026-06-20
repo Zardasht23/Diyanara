@@ -196,7 +196,7 @@ Migrations are applied automatically when the backend container starts (`prisma 
 To run migrations manually:
 
 ```bash
-docker compose exec backend node_modules/.bin/prisma migrate deploy
+docker compose exec backend node node_modules/prisma/build/index.js migrate deploy
 ```
 
 To seed the database (first deploy or after reset):
@@ -404,6 +404,7 @@ Common causes:
 
 | Error | Fix |
 | ----- | --- |
+| `Can't write to .../@prisma/engines` | Rebuild with latest Dockerfile (`docker compose build --no-cache backend`). Engines must be bundled at build time and owned by the `node` user (uid 1000). |
 | `JWT_SECRET must be set` | Set a strong `JWT_SECRET` in `.env` |
 | `CORS_ORIGIN must be set` | Set `CORS_ORIGIN` to your public domain |
 | `FRONTEND_URL must be set` | Set `FRONTEND_URL` to your public domain |
